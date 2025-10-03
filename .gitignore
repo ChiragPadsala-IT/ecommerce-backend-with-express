@@ -1,0 +1,6 @@
+dist
+
+#Dependency directories
+node_modules/
+
+config/config.env
