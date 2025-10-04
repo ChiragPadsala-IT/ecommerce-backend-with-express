@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const CryptoJS = require("crypto-js");
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -16,17 +17,22 @@ const userSchema = new mongoose.Schema({
     minLength: [10, "Password should be 10 or more characters..."],
     select: false,
   },
-  resetPasswordToken: String,
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
+  resetPasswordExpire: {
+    type: Date,
+    default: null,
+  },
 });
 
-userSchema.pre("save", function async(next) {
-  if (this.isModified("password")) {
-    bcrypt.hash(this.password, process.env.BCRYPT_SALTORROUNDS, (err, hash) => {
-      this.password = hash;
-      console.log(hash);
-      next();
-    });
-  }
+userSchema.pre("save", async function (next) {
+  console.log("Chirag := " + this.password);
+  if (!this.isModified("password")) return next();
+
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
 userSchema.methods.comparePassword = async function (enteredPassword) {
@@ -40,10 +46,18 @@ userSchema.methods.getJWTToken = function () {
   });
 };
 
-userSchema.methods.getResetPasswordToken = function () {
-  const random = CryptoJS.lib.WordArray.random();
+userSchema.methods.getResetPasswordToken = async function () {
+  const resetToken = CryptoJS.lib.WordArray.random(
+    process.env.CRYPTOJS_KEY
+  ).toString();
 
-  console.log(random);
+  this.resetPasswordToken = resetToken
+    .toString(CryptoJS.enc.Base64)
+    .replace(/[^a-zA-Z0-9]/g, "");
+
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+  return resetToken;
 };
 
 module.exports = mongoose.model("User", userSchema);
