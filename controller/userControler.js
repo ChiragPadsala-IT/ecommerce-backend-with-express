@@ -80,3 +80,28 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler(error.message, 500));
   }
 });
+
+exports.resetPassword = catchAsyncError(async (req, res, next) => {
+  const resetPasswordToken = req.params.token;
+
+  console.log(resetPasswordToken);
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(
+      new ErrorHandler("Invalid request or your link has been expired", 400)
+    );
+  }
+
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  await user.save({ validateBeforeSave: false });
+
+  sendToken(user, 200, res);
+});
