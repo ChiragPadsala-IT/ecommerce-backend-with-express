@@ -63,7 +63,6 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
 
   const message = `Your reset password link := \n\n ${resetPasswordUrl} \n\n if you have not requested please ignore it.`;
 
-  console.log("Hello forgot");
   try {
     sendEmail({
       email: user.email,
