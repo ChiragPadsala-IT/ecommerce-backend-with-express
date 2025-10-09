@@ -6,25 +6,21 @@ const orderSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  products: [
-    {
-      productID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
-      },
-      quantity: {
-        type: Number,
-        required: true,
-        min: 1,
-      },
-      deliveryStatus: {
-        type: String,
-        enum: ["Order Placed", "Dispatched", "Delivered"],
-        default: "Order Placed",
-      },
-    },
-  ],
+  productID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1,
+  },
+  deliveryStatus: {
+    type: String,
+    enum: ["Order Placed", "Dispatched", "Delivered", "Cancelled"],
+    default: "Order Placed",
+  },
   orderDate: {
     type: Date,
     default: Date.now,
