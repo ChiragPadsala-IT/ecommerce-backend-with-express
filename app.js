@@ -12,9 +12,11 @@ app.use(express.json());
 
 const userRoute = require("./routes/userRoute");
 const productRoute = require("./routes/productRoute");
+const orderRoute = require("./routes/orderRoute");
 
 app.use("/api/v1", userRoute);
 app.use("/api/v1/product", productRoute);
+app.use("/api/v1/order", orderRoute);
 
 app.use(error);
 
