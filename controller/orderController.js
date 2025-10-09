@@ -3,6 +3,7 @@ const Product = require("../model/productModel");
 const Order = require("../model/orderModel");
 const sendEmail = require("../utils/sendMail");
 
+//create order
 exports.createOrder = catchAsyncError(async (req, res, next) => {
   const { products } = req.body;
 
