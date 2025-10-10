@@ -10,7 +10,7 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
   // check product is available or not
   for (const item of products) {
     const product = await Product.findById(item.productID);
-    if (!(product.itemCount > item.quantity)) {
+    if (!(product.itemCount >= item.quantity)) {
       return res.status(404).json({
         success: false,
         message:

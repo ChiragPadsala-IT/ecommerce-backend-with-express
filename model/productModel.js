@@ -26,7 +26,11 @@ const productSchema = mongoose.Schema({
   type: String,
   mfg: Date,
   life: String,
-  category: String,
+  categoryID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+    required: true,
+  },
   tag: String,
   rating: Number,
   price: Number,
