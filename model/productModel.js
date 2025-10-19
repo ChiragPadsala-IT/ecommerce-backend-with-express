@@ -31,6 +31,11 @@ const productSchema = mongoose.Schema({
     ref: "Category",
     required: true,
   },
+  userID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   tag: String,
   rating: Number,
   price: Number,

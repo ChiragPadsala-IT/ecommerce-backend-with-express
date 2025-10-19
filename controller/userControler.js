@@ -5,9 +5,9 @@ const catchAsyncError = require("../middleware/catchAsyncError");
 const sendEmail = require("../utils/sendMail");
 
 exports.signupUser = catchAsyncError(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
-  const user = await User.create({ email, password });
+  const user = await User.create({ email, password, role });
 
   sendToken(user, 201, res);
 });

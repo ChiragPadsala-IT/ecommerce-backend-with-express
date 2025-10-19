@@ -17,6 +17,11 @@ const userSchema = new mongoose.Schema({
     minLength: [10, "Password should be 10 or more characters..."],
     select: false,
   },
+  role: {
+    type: String,
+    require: true,
+    select: false,
+  },
   resetPasswordToken: {
     type: String,
     default: null,
