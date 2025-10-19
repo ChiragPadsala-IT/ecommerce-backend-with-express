@@ -35,18 +35,34 @@ exports.bestSellerProducts = catchAsyncError(async (req, res, next) => {
       $unwind: "$product",
     },
     {
+      // Count how many times each product was ordered
       $group: {
         _id: {
-          user: "$user",
-          category: "$product.categoryID",
+          productID: "$product._id",
+          categoryID: "$product.categoryID",
         },
         totalOrders: { $sum: 1 },
+        product: { $first: "$product" },
       },
     },
     {
+      // Sort by category and total orders descending
       $sort: {
+        "_id.categoryID": 1,
         totalOrders: -1,
       },
+    },
+    {
+      // Take only the highest-ordered product per category
+      $group: {
+        _id: "$_id.categoryID",
+        product: { $first: "$product" },
+        totalOrders: { $first: "$totalOrders" },
+      },
+    },
+    {
+      // Return only product details (remove _id and totals if you wish)
+      $replaceRoot: { newRoot: "$product" },
     },
   ]);
 
