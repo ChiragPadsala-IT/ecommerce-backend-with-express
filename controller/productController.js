@@ -71,3 +71,9 @@ exports.bestSellerProducts = catchAsyncError(async (req, res, next) => {
   res.status(200).json(order);
   // res.status(200).json({ success: true, message: "" });
 });
+
+exports.newProduct = catchAsyncError(async (req, res, next) => {
+  const product = await Product.find().sort({ createdAt: -1 });
+
+  res.status(200).json({ success: true, products: product });
+});

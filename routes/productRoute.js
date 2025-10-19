@@ -2,6 +2,7 @@ const express = require("express");
 const {
   bestSellerProducts,
   createNewProduct,
+  newProduct,
 } = require("../controller/productController");
 const { isAuthenticatedUser } = require("../middleware/isAuthenticated");
 const { isAdmin } = require("../middleware/isAdmin");
@@ -13,5 +14,6 @@ router
   .post(isAuthenticatedUser, isAdmin, createNewProduct);
 
 router.route("/best-seller-products").get(bestSellerProducts);
+router.route("/new-products").get(newProduct);
 
 module.exports = router;
