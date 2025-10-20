@@ -17,7 +17,22 @@ exports.createNewProduct = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.updateProduct = catchAsyncError(async (req, res, next) => {});
+exports.updateProduct = catchAsyncError(async (req, res, next) => {
+  console.log(req.params.id);
+  console.log(req.body);
+
+  const updatedProduct = await Product.findByIdAndUpdate(
+    req.params.id,
+    { $set: req.body },
+    { new: true, runValidators: true }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: `${updatedProduct.name} is updated successfully`,
+    updatedProduct: updatedProduct,
+  });
+});
 
 exports.bestSellerProducts = catchAsyncError(async (req, res, next) => {
   // const order = await Order.find();
