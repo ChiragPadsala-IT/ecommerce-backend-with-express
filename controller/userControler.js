@@ -13,29 +13,23 @@ exports.signupUser = catchAsyncError(async (req, res, next) => {
 });
 
 exports.loginUser = catchAsyncError(async (req, res, next) => {
+  console.log("hello");
   const { email, password } = req.body;
-
+  console.log(req.body);
   if (!email || !password) {
     return next(new ErrorHandler("Email and Password are mandatories...", 400));
   }
-
   const user = await User.findOne({ email }).select("+password");
   //   const user = await User.findOne({ email });
-
   console.log(user);
-
   if (!user) {
     return next(new ErrorHandler("Invalid Email and Password...", 401));
   }
-
   const isPasswordMatched = await user.comparePassword(password);
-
   console.log("password := " + isPasswordMatched);
-
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Invalid Email and Password...", 401));
   }
-
   sendToken(user, 200, res);
 });
 
