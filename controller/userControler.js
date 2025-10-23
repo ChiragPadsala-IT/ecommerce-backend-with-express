@@ -7,9 +7,80 @@ const sendEmail = require("../utils/sendMail");
 exports.signupUser = catchAsyncError(async (req, res, next) => {
   const { email, password, role } = req.body;
 
-  const user = await User.create({ email, password, role });
+  console.log(email);
 
-  sendToken(user, 201, res);
+  const otp = Math.floor(1000 + Math.random() * 9000);
+
+  const otpExpire = Date.now() + 5 * 60 * 1000;
+
+  const user = await User.create({ email, password, role, otp, otpExpire });
+
+  await sendEmail({
+    email: email,
+    subject: "Varification",
+    message: `Your verification code is ${otp}. This code will expire in 5 minutes. Please do not share it with anyone.`,
+  });
+
+  res.status(200).json({
+    success: true,
+    message:
+      "A verification code has been sent to your registered email address. Please do not share this code with anyone.",
+  });
+
+  // sendToken(user, 201, res);
+});
+
+exports.verifyUser = catchAsyncError(async (req, res, next) => {
+  const otp = parseInt(req.body.varificationCode);
+
+  console.log(otp);
+
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  if (Date.now() > user.otpExpire) {
+    return res.status(400).json({
+      success: false,
+      message: "Verification code has expired. Please request a new one.",
+    });
+  }
+
+  if (otp !== user.otp) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid verification code.",
+    });
+  }
+
+  await User.findOneAndUpdate(
+    { email: req.body.email },
+    { otp: null, verifyUser: true },
+    { new: true }
+  );
+
+  res.status(200).json({ success: true, message: "Verified successfully" });
+});
+
+exports.resendVerificationCode = catchAsyncError(async (req, res, next) => {
+  const otp = Math.floor(1000 + Math.random() * 9000);
+
+  const otpExpire = Date.now() + 5 * 60 * 1000;
+
+  await User.findOneAndUpdate({ email: req.body.email }, { otp, otpExpire });
+
+  await sendEmail({
+    email: req.body.email,
+    subject: "Varification",
+    message: `Your verification code is ${otp}. This code will expire in 5 minutes. Please do not share it with anyone.`,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Code sent successfully",
+  });
 });
 
 exports.loginUser = catchAsyncError(async (req, res, next) => {

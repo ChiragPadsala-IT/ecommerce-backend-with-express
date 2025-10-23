@@ -30,6 +30,16 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  otp: {
+    type: Number,
+  },
+  otpExpire: {
+    type: Date,
+  },
+  verifyUser: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 userSchema.pre("save", async function (next) {

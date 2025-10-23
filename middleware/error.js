@@ -10,6 +10,14 @@ module.exports = (err, req, res, next) => {
     err = new ErrorHandler(message, 400);
   }
 
+  console.log("********************************************************");
+  console.log(err.code);
+  if (err.code === 11000) {
+    const message = `Account already exist`;
+    err = new ErrorHandler(message, 409);
+  }
+  console.log("********************************************************");
+
   if (err.name === "TokenExpiredError") {
     const message = `Json web token is expired, try again`;
     err = new ErrorHandler(message, 400);
