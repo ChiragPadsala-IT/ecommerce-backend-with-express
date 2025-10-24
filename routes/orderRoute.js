@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.route("/create-order").post(isAuthenticatedUser, createOrder);
 router.route("/cancel-order").post(isAuthenticatedUser, cancelOrder);
+router.route("/mycart").post(isAuthenticatedUser);
 
 module.exports = router;
