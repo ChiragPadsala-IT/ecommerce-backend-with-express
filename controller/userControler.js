@@ -84,7 +84,6 @@ exports.resendVerificationCode = catchAsyncError(async (req, res, next) => {
 });
 
 exports.loginUser = catchAsyncError(async (req, res, next) => {
-  console.log("hello");
   const { email, password } = req.body;
   console.log(req.body);
   if (!email || !password) {
@@ -102,6 +101,10 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Invalid Email and Password...", 401));
   }
   sendToken(user, 200, res);
+});
+
+exports.isLogedIn = catchAsyncError(async (req, res, next) => {
+  res.status(200).json({ success: true, user: req.user });
 });
 
 exports.logoutUser = catchAsyncError((req, res, next) => {

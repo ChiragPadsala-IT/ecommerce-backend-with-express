@@ -20,25 +20,29 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     require: true,
-    select: false,
   },
   resetPasswordToken: {
     type: String,
     default: null,
+    select: false,
   },
   resetPasswordExpire: {
     type: Date,
     default: null,
+    select: false,
   },
   otp: {
     type: Number,
+    select: false,
   },
   otpExpire: {
     type: Date,
+    select: false,
   },
   verifyUser: {
     type: Boolean,
     default: false,
+    select: false,
   },
 });
 
