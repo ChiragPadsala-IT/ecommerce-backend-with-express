@@ -37,3 +37,22 @@ exports.addToMyCartController = catchAsyncError(async (req, res, next) => {
     });
   }
 });
+
+exports.getMyCartData = catchAsyncError(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const data = await MyCart.findOne({ user: userId })
+    .populate("items.productId")
+    .lean();
+
+  console.log(JSON.stringify(data, null, 2));
+
+  if (data && data.items) {
+    data.items = data.items.map((item) => ({
+      ...item.productId, // spread product fields
+      quantity: item.quantity,
+    }));
+  }
+
+  res.status(200).json({ success: true, cart: data });
+});
