@@ -19,11 +19,13 @@ const userRoute = require("./routes/userRoute");
 const productRoute = require("./routes/productRoute");
 const orderRoute = require("./routes/orderRoute");
 const myCartRoute = require("./routes/mycartRoute");
+const favoriteRoute = require("./routes/favoriteRoute");
 
 app.use("/api/v1", userRoute);
 app.use("/api/v1/product", productRoute);
 app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/mycart", myCartRoute);
+app.use("/api/v1/favorite", favoriteRoute);
 
 app.use(error);
 
