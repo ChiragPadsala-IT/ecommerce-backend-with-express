@@ -15,15 +15,17 @@ exports.addToFavoriteController = catchAsyncError(async (req, res, next) => {
   res.status(200).json({ success: true, message: "product added to favorite" });
 });
 
-exports.removeToFavoriteController = catchAsyncError(async (req, res, next) => {
-  const userId = req.user._id;
-  const productId = req.body.productId;
+exports.removeFromFavoriteController = catchAsyncError(
+  async (req, res, next) => {
+    const userId = req.user._id;
+    const productId = req.body.productId;
 
-  const newData = await Favorite.findOneAndUpdate(
-    { userId: userId },
-    { $pull: { favorites: productId } },
-    { new: true }
-  );
+    const newData = await Favorite.findOneAndUpdate(
+      { userId: userId },
+      { $pull: { favorites: productId } },
+      { new: true }
+    );
 
-  res.status(200).json({ success: true, favoriteList: newData });
-});
+    res.status(200).json({ success: true, favoriteList: newData });
+  }
+);
