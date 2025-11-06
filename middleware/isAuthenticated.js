@@ -4,7 +4,11 @@ const User = require("../model/userModel");
 const ErrorHandler = require("../utils/errorHandler");
 
 exports.isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
-  const token = req.headers.authorization.split(" ")[1];
+  let token;
+
+  if (req.headers && req.headers.authorization) {
+    token = req.headers.authorization.split(" ")[1];
+  }
 
   if (!token) {
     return next(new ErrorHandler("Please log in...", 401));
