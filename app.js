@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const error = require("./middleware/error");
+const rateLimit = require("./middleware/rateLimit");
 const cookieParser = require("cookie-parser");
 
 const app = express();
@@ -20,6 +21,8 @@ const productRoute = require("./routes/productRoute");
 const orderRoute = require("./routes/orderRoute");
 const myCartRoute = require("./routes/mycartRoute");
 const favoriteRoute = require("./routes/favoriteRoute");
+
+app.use(rateLimit);
 
 app.use("/api/v1", userRoute);
 app.use("/api/v1/product", productRoute);
