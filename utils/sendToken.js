@@ -13,8 +13,5 @@ exports.sendToken = (user, statusCode, res) => {
     expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
   };
 
-  res
-    .status(200)
-    .cookie("token", token, opetion)
-    .json({ success: true, user, token });
+  res.status(200).json({ success: true, user, token });
 };
