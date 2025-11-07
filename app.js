@@ -21,6 +21,7 @@ const productRoute = require("./routes/productRoute");
 const orderRoute = require("./routes/orderRoute");
 const myCartRoute = require("./routes/mycartRoute");
 const favoriteRoute = require("./routes/favoriteRoute");
+const contactUsRoute = require("./routes/contactUsRoute");
 
 app.use(rateLimit);
 
@@ -29,6 +30,7 @@ app.use("/api/v1/product", productRoute);
 app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/mycart", myCartRoute);
 app.use("/api/v1/favorite", favoriteRoute);
+app.use("/api/v1/contact-us", contactUsRoute);
 
 app.use(error);
 
