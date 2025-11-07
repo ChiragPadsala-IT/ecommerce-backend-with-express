@@ -5,7 +5,7 @@ exports.addToContactUsController = catchAsyncError(async (req, res, next) => {
   const ip =
     req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
   const contact = await contactUsModel.findOneAndUpdate(
-    { ip }, // condition: same IP
+    { ip },
     {
       ...req.body,
       ip,
