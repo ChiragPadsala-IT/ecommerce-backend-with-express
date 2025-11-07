@@ -49,11 +49,11 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
     }
   }
 
-  sendEmail({
-    email: req.user.email,
-    subject: "Order Confirm",
-    message: "Your Order placed successfully",
-  });
+  // sendEmail({
+  //   email: req.user.email,
+  //   subject: "Order Confirm",
+  //   message: "Your Order placed successfully",
+  // });
 
   res.status(200).json({
     success: true,
