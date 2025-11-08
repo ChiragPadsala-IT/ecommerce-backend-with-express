@@ -54,3 +54,13 @@ exports.getMyCartData = catchAsyncError(async (req, res, next) => {
 
   res.status(200).json({ success: true, cart: data });
 });
+
+exports.deleteCartData = catchAsyncError(async (req, res, next) => {
+  const deletedItem = await Cart.findByIdAndDelete(req.body.id);
+
+  if (!deletedItem) {
+    return res.status(404).json({ message: "Cart item not found" });
+  }
+
+  res.status(200).json({ message: "Cart item deleted successfully" });
+});
