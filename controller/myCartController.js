@@ -47,7 +47,7 @@ exports.getMyCartData = catchAsyncError(async (req, res, next) => {
 
   if (data && data.items) {
     data.items = data.items.map((item) => ({
-      ...item.productId, // spread product fields
+      ...item.productId,
       quantity: item.quantity,
     }));
   }
@@ -56,11 +56,30 @@ exports.getMyCartData = catchAsyncError(async (req, res, next) => {
 });
 
 exports.deleteCartData = catchAsyncError(async (req, res, next) => {
-  const deletedItem = await Cart.findByIdAndDelete(req.body.id);
+  const updatedCart = await MyCart.findOneAndUpdate(
+    { user: req.user._id },
+    { $pull: { items: { productId: req.params.id } } },
+    { new: true }
+  )
+    .populate("items.productId")
+    .lean();
 
-  if (!deletedItem) {
-    return res.status(404).json({ message: "Cart item not found" });
+  if (!updatedCart) {
+    return res
+      .status(404)
+      .json({ success: false, message: "Cart or product not found" });
   }
 
-  res.status(200).json({ message: "Cart item deleted successfully" });
+  if (updatedCart && updatedCart.items) {
+    updatedCart.items = updatedCart.items.map((item) => ({
+      ...item.productId,
+      quantity: item.quantity,
+    }));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Product removed from cart",
+    updatedCart: updatedCart,
+  });
 });
