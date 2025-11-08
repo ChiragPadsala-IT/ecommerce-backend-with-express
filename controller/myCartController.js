@@ -45,8 +45,6 @@ exports.getMyCartData = catchAsyncError(async (req, res, next) => {
     .populate("items.productId")
     .lean();
 
-  console.log(JSON.stringify(data, null, 2));
-
   if (data && data.items) {
     data.items = data.items.map((item) => ({
       ...item.productId, // spread product fields

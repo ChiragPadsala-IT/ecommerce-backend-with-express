@@ -7,8 +7,6 @@ const sendEmail = require("../utils/sendMail");
 exports.signupUser = catchAsyncError(async (req, res, next) => {
   const { email, password, role } = req.body;
 
-  console.log(email);
-
   const otp = Math.floor(1000 + Math.random() * 9000);
 
   const otpExpire = Date.now() + 5 * 60 * 1000;
@@ -32,8 +30,6 @@ exports.signupUser = catchAsyncError(async (req, res, next) => {
 
 exports.verifyUser = catchAsyncError(async (req, res, next) => {
   const otp = parseInt(req.body.varificationCode);
-
-  console.log(otp);
 
   const user = await User.findOne({ email: req.body.email });
 
@@ -85,18 +81,16 @@ exports.resendVerificationCode = catchAsyncError(async (req, res, next) => {
 
 exports.loginUser = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
-  console.log(req.body);
   if (!email || !password) {
     return next(new ErrorHandler("Email and Password are mandatories...", 400));
   }
   const user = await User.findOne({ email }).select("+password");
-  //   const user = await User.findOne({ email });
-  console.log(user);
+
   if (!user) {
     return next(new ErrorHandler("Invalid Email and Password...", 401));
   }
   const isPasswordMatched = await user.comparePassword(password);
-  console.log("password := " + isPasswordMatched);
+
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Invalid Email and Password...", 401));
   }
@@ -151,8 +145,6 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
 
 exports.resetPassword = catchAsyncError(async (req, res, next) => {
   const resetPasswordToken = req.params.token;
-
-  console.log(resetPasswordToken);
 
   const user = await User.findOne({
     resetPasswordToken,

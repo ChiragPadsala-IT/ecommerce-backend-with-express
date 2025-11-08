@@ -9,8 +9,6 @@ exports.createNewProduct = catchAsyncError(async (req, res, next) => {
 
   const product = await Product.create(req.body);
 
-  console.log(product);
-
   res.status(200).json({
     success: true,
     message: "New product created successfully...",
@@ -18,9 +16,6 @@ exports.createNewProduct = catchAsyncError(async (req, res, next) => {
 });
 
 exports.updateProduct = catchAsyncError(async (req, res, next) => {
-  console.log(req.params.id);
-  console.log(req.body);
-
   const updatedProduct = await Product.findByIdAndUpdate(
     req.params.id,
     { $set: req.body },
@@ -80,8 +75,6 @@ exports.bestSellerProducts = catchAsyncError(async (req, res, next) => {
       $replaceRoot: { newRoot: "$product" },
     },
   ]);
-
-  console.log(order[0].totalOrders);
 
   res.status(200).json(order);
   // res.status(200).json({ success: true, message: "" });

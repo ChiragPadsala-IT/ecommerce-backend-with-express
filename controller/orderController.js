@@ -6,7 +6,6 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 //create order
 exports.createOrder = catchAsyncError(async (req, res, next) => {
-  console.log(req.body);
   const { products } = req.body;
 
   // check product is available or not
@@ -32,7 +31,6 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
     });
 
     try {
-      console.log(item);
       // create order
       await Order.create({
         user: req.user._id,
