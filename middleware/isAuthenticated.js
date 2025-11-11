@@ -6,6 +6,7 @@ const ErrorHandler = require("../utils/errorHandler");
 exports.isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
   let token;
 
+  console.log(req.headers.authorization);
   if (req.headers && req.headers.authorization) {
     token = req.headers.authorization.split(" ")[1];
   }
