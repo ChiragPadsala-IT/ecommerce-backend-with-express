@@ -11,19 +11,35 @@ exports.signupUser = catchAsyncError(async (req, res, next) => {
 
   const otpExpire = Date.now() + 5 * 60 * 1000;
 
-  const user = await User.create({ email, password, role, otp, otpExpire });
+  const user = await User.findOne({ email: email }).select("+verifyUser");
 
-  await sendEmail({
-    email: email,
-    subject: "Varification",
-    message: `Your verification code is ${otp}. This code will expire in 5 minutes. Please do not share it with anyone.`,
-  });
+  if (user) {
+    if (user.verifyUser) {
+      res.status(409).json({ success: false, message: "Already registered" });
+    } else {
+      user.otp = otp;
+      user.otpExpire = otpExpire;
+      user.password = password;
+      await user.save();
+    }
+  } else {
+    await User.create({ email, password, role, otp, otpExpire });
+  }
 
-  res.status(200).json({
+  // await sendEmail({
+  //   email: email,
+  //   subject: "Varification",
+  //   message: `Your verification code is ${otp}. This code will expire in 5 minutes. Please do not share it with anyone.`,
+  // });
+
+  res.status(200).cookie("email", email).cookie("password", password).json({
     success: true,
+    otp: otp,
     message:
       "A verification code has been sent to your registered email address. Please do not share this code with anyone.",
   });
+
+  // res.status(200).json(user);
 
   // sendToken(user, 201, res);
 });
@@ -31,7 +47,9 @@ exports.signupUser = catchAsyncError(async (req, res, next) => {
 exports.verifyUser = catchAsyncError(async (req, res, next) => {
   const otp = parseInt(req.body.varificationCode);
 
-  const user = await User.findOne({ email: req.body.email });
+  // const user = await User.findOne({ email: req.body.email });
+
+  const user = await User.create({ email, password, role, otp, otpExpire });
 
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });

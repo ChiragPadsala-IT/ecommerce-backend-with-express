@@ -22,6 +22,7 @@ const orderRoute = require("./routes/orderRoute");
 const myCartRoute = require("./routes/mycartRoute");
 const favoriteRoute = require("./routes/favoriteRoute");
 const contactUsRoute = require("./routes/contactUsRoute");
+const homeBannerRoute = require("./routes/homeBannerRoute");
 
 app.use(rateLimit);
 
@@ -31,6 +32,7 @@ app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/mycart", myCartRoute);
 app.use("/api/v1/favorite", favoriteRoute);
 app.use("/api/v1/contact-us", contactUsRoute);
+app.use("/api/v1/homebanner", homeBannerRoute);
 
 app.use(error);
 
