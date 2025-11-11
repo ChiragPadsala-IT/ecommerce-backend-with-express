@@ -47,9 +47,7 @@ exports.signupUser = catchAsyncError(async (req, res, next) => {
 exports.verifyUser = catchAsyncError(async (req, res, next) => {
   const otp = parseInt(req.body.varificationCode);
 
-  // const user = await User.findOne({ email: req.body.email });
-
-  const user = await User.create({ email, password, role, otp, otpExpire });
+  const user = await User.findOne({ email: req.body.email }).select("+otp");
 
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
