@@ -9,4 +9,5 @@ route
   .route("/add-home-banner-image")
   .post(isAuthenticatedUser, galleryController);
 
+route.route("/get-home-banner-image");
 module.exports = route;

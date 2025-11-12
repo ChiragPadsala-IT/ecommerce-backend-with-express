@@ -31,7 +31,7 @@ exports.galleryController = catchAsyncError(async (req, res, next) => {
 
     // console.log(formattedImages);
     const gallery = await GalleryModel.create({
-      galleryName,
+      name: galleryName,
       images: formattedImages,
     });
 
@@ -48,3 +48,9 @@ exports.galleryController = catchAsyncError(async (req, res, next) => {
   }
   // const homeBanner = await GalleryModel.find();
 });
+
+// exports.getHomebannerImageController = catchAsyncError(
+//   async (req, res, next) => {
+//     GalleryModel.findOne({name: })
+//   }
+// );
