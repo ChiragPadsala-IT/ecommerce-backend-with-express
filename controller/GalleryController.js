@@ -30,10 +30,11 @@ exports.galleryController = catchAsyncError(async (req, res, next) => {
     );
 
     // console.log(formattedImages);
-    const gallery = await GalleryModel.create({
-      name: galleryName,
-      images: formattedImages,
-    });
+    const gallery = await GalleryModel.findOneAndUpdate(
+      { name: galleryName },
+      { $setOnInsert: { name: galleryName, images: formattedImages } },
+      { new: true, upsert: true }
+    );
 
     await gallery.save();
 
@@ -46,11 +47,20 @@ exports.galleryController = catchAsyncError(async (req, res, next) => {
       .status(400)
       .json({ success: false, message: "Unauthorized user" });
   }
-  // const homeBanner = await GalleryModel.find();
 });
 
-// exports.getHomebannerImageController = catchAsyncError(
-//   async (req, res, next) => {
-//     GalleryModel.findOne({name: })
-//   }
-// );
+exports.getHomebannerImageController = catchAsyncError(
+  async (req, res, next) => {
+    const gallery = await GalleryModel.findOne({ name: "homebanner" }).select(
+      "-_id"
+    );
+
+    if (!gallery) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Gallery not fount" });
+    }
+
+    res.status(400).json({ success: true, homeGallery: gallery });
+  }
+);
