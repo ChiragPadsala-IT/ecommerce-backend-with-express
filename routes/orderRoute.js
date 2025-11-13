@@ -3,18 +3,23 @@ const {
   createOrder,
   cancelOrder,
   paymentController,
+  paymentSuccessController,
+  paymentFailedController,
 } = require("../controller/orderController");
 const { isAuthenticatedUser } = require("../middleware/isAuthenticated");
 
 const router = express.Router();
 
-router.route("/create-order").post(
-  isAuthenticatedUser,
-  createOrder
-  // paymentController
-);
+router.route("/create-order").post(isAuthenticatedUser, createOrder);
+
+router
+  .route("/payment-success")
+  .get(isAuthenticatedUser, paymentSuccessController);
+
+router
+  .route("/payment-failed")
+  .get(isAuthenticatedUser, paymentFailedController);
+
 router.route("/cancel-order").post(isAuthenticatedUser, cancelOrder);
-router.route("/mycart").post(isAuthenticatedUser);
-// router.route("/payment").post(isAuthenticatedUser);
 
 module.exports = router;

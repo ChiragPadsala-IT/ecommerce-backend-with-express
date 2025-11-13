@@ -2,6 +2,7 @@ const catchAsyncError = require("../middleware/catchAsyncError");
 const Product = require("../model/productModel");
 const Order = require("../model/orderModel");
 const sendEmail = require("../utils/sendMail");
+const myCartModel = require("../model/myCartModel");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 exports.createOrder = catchAsyncError(async (req, res, next) => {
@@ -90,8 +91,49 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
     orderId: order._id,
     sessionUrl: session.url,
   });
-  // req.orderId = order._id;
-  // req.next();
+});
+
+// payment success
+exports.paymentSuccessController = catchAsyncError(async (req, res, next) => {
+  console.log(req.query.orderId);
+  const orderId = req.query.orderId; // <-- get orderId from URL
+  console.log("Order ID:", orderId);
+
+  if (!orderId) {
+    return res.status(400).json({ message: "Missing orderId" });
+  }
+
+  await myCartModel.deleteMany();
+
+  await Order.findByIdAndUpdate(orderId, {
+    paymentStatus: "Success",
+  });
+
+  // You can now fetch the order from DB or mark payment as completed
+  res.json({ message: "Payment successful", orderId });
+});
+
+// payment Failed
+exports.paymentFailedController = catchAsyncError(async (req, res, next) => {
+  const orderId = req.query.orderId; // <-- get orderId from URL
+  console.log("Order ID:", orderId);
+
+  const order = await Order.findByIdAndUpdate(
+    orderId,
+    { paymentStatus: "Cancel" },
+    { new: true }
+  ).populate("products.productId");
+
+  // Restock items
+  if (order) {
+    for (const item of order.products) {
+      await Product.findByIdAndUpdate(item.productId._id, {
+        $inc: { itemCount: item.quantity },
+      });
+    }
+  }
+
+  res.status(400).json({ success: false, message: "Payment failed" });
 });
 
 // cancel order
