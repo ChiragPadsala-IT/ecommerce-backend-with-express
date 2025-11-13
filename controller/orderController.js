@@ -4,66 +4,94 @@ const Order = require("../model/orderModel");
 const sendEmail = require("../utils/sendMail");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-//create order
 exports.createOrder = catchAsyncError(async (req, res, next) => {
-  const { products } = req.body;
+  const { products } = req.body; // [{ productId, quantity }]
 
-  // check product is available or not
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide at least one product to create an order.",
+    });
+  }
+
+  // 🔹 Step 1: Validate each product & calculate total amount
+  let totalAmount = 0;
+  const validatedProducts = [];
+
   for (const item of products) {
-    const product = await Product.findById(item.productID);
-    if (!(product.itemCount >= item.quantity)) {
+    const product = await Product.findById(item.productId);
+
+    if (!product) {
       return res.status(404).json({
         success: false,
-        message:
-          item.quantity > 0
-            ? `Only ${product.itemCount} ${product.name} available`
-            : `${product.name} is out of stock`,
+        message: `Product with ID ${item.productId} not found.`,
       });
     }
-  }
 
-  for (const item of products) {
-    // decrease product count
-    await Product.findByIdAndUpdate(item.productID, {
-      $inc: {
-        itemCount: -item.quantity,
-      },
+    if (product.itemCount < item.quantity) {
+      return res.status(400).json({
+        success: false,
+        message: `${product.name} only has ${product.itemCount} items left.`,
+      });
+    }
+
+    // Add subtotal
+    totalAmount += product.price * item.quantity;
+
+    validatedProducts.push({
+      productId: product._id,
+      quantity: item.quantity,
     });
-
-    try {
-      // create order
-      await Order.create({
-        user: req.user._id,
-        productID: item.productID,
-        quantity: item.quantity,
-      });
-    } catch (err) {
-      // increase product
-      await Product.findByIdAndUpdate(item.productID, {
-        $inc: {
-          itemCount: item.quantity,
-        },
-      });
-
-      res.status(404).json({ success: false, message: err.message });
-    }
   }
 
-  // sendEmail({
-  //   email: req.user.email,
-  //   subject: "Order Confirm",
-  //   message: "Your Order placed successfully",
-  // });
+  // 🔹 Step 2: Create Order (Pending until payment is completed)
+  const order = await Order.create({
+    user: req.user._id,
+    products: validatedProducts,
+    totalAmount,
+  });
 
-  // res.status(200).json({
-  //   success: true,
-  //   message: "Order placed successfully!",
-  //   products: products,
-  //   // clientSecret:
-  //   //   "pk_test_51SQi6rQLy61FKKAvt7EIpsakkyIRp2oDs2mIOgdzrwpZLfOhJkcVvWkhg1XQpBgEUjE9PrugkTtxxpeOlr8lCw0K00nkQJIm1g",
-  // });
+  // 🔹 Step 3: Create Stripe line items for payment
+  const lineItems = [];
 
-  next();
+  for (const item of validatedProducts) {
+    const product = await Product.findById(item.productId);
+    lineItems.push({
+      price_data: {
+        currency: "cad",
+        product_data: {
+          name: product.name,
+          images: [product.image],
+        },
+        unit_amount: Math.round(product.price * 100), // in cents
+      },
+      quantity: item.quantity,
+    });
+  }
+
+  // 🔹 Step 4: Create Stripe checkout session
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: lineItems,
+    mode: "payment",
+    customer_email: req.user.email,
+    success_url: `http://localhost:3000/payment-success?orderId=${order._id}`,
+    cancel_url: `http://localhost:3000/payment-failed?orderId=${order._id}`,
+    metadata: {
+      orderId: order._id.toString(),
+      userId: req.user._id.toString(),
+    },
+  });
+
+  // 🔹 Step 5: Respond to frontend with session URL
+  res.status(201).json({
+    success: true,
+    message: "Order created successfully. Proceed to payment.",
+    orderId: order._id,
+    sessionUrl: session.url,
+  });
+  // req.orderId = order._id;
+  // req.next();
 });
 
 // cancel order
@@ -75,36 +103,5 @@ exports.cancelOrder = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Order cancelled successfully!",
-  });
-});
-
-// payment
-exports.paymentController = catchAsyncError(async (req, res, next) => {
-  const product = await stripe.products.create({
-    name: "Chirag",
-  });
-
-  const price = await stripe.prices.create({
-    product: product.id,
-    unit_amount: 100 * 100, // $100
-    currency: "usd",
-  });
-
-  const session = await stripe.checkout.sessions.create({
-    line_items: [
-      {
-        price: price.id,
-        quantity: 1,
-      },
-    ],
-    mode: "payment",
-    success_url: "http://localhost:3000",
-    cancel_url: "http://localhost:3000/mycart",
-    customer_email: "chiragpadsalatt11@gmail.com",
-  });
-
-  res.status(200).json({
-    success: true,
-    session: session.url,
   });
 });
