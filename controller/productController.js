@@ -30,54 +30,63 @@ exports.updateProduct = catchAsyncError(async (req, res, next) => {
 });
 
 exports.bestSellerProducts = catchAsyncError(async (req, res, next) => {
-  // const order = await Order.find();
+  const bestSellers = await Order.aggregate([
+    // Step 1: Deconstruct products array
+    {
+      $unwind: "$products",
+    },
 
-  const order = await Order.aggregate([
+    // Step 2: Join product data
     {
       $lookup: {
         from: "products",
-        localField: "productID",
+        localField: "products.productId",
         foreignField: "_id",
         as: "product",
       },
     },
+    { $unwind: "$product" },
+
+    // Step 3: Group by product to count total quantity sold
     {
-      $unwind: "$product",
-    },
-    {
-      // Count how many times each product was ordered
       $group: {
         _id: {
-          productID: "$product._id",
-          categoryID: "$product.categoryID",
+          productId: "$product._id",
+          categoryId: "$product.categoryID",
         },
-        totalOrders: { $sum: 1 },
+        totalOrderedQty: { $sum: "$products.quantity" },
         product: { $first: "$product" },
       },
     },
+
+    // Step 4: Sort products by category and quantity (descending)
     {
-      // Sort by category and total orders descending
       $sort: {
-        "_id.categoryID": 1,
-        totalOrders: -1,
+        "_id.categoryId": 1,
+        totalOrderedQty: -1,
       },
     },
+
+    // Step 5: Get only the highest-selling product from each category
     {
-      // Take only the highest-ordered product per category
       $group: {
-        _id: "$_id.categoryID",
+        _id: "$_id.categoryId",
         product: { $first: "$product" },
-        totalOrders: { $first: "$totalOrders" },
+        totalOrderedQty: { $first: "$totalOrderedQty" },
       },
     },
+
+    // Step 6: Return clean product data
     {
-      // Return only product details (remove _id and totals if you wish)
       $replaceRoot: { newRoot: "$product" },
     },
   ]);
 
-  res.status(200).json(order);
-  // res.status(200).json({ success: true, message: "" });
+  res.status(200).json({
+    success: true,
+    count: bestSellers.length,
+    products: bestSellers,
+  });
 });
 
 exports.newProduct = catchAsyncError(async (req, res, next) => {
