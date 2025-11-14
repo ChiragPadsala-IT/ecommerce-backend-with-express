@@ -99,7 +99,6 @@ exports.newProduct = catchAsyncError(async (req, res, next) => {
 exports.getProductsByCategory = catchAsyncError(async (req, res, next) => {
   const { category } = req.query;
 
-  console.log(category);
   if (!category) {
     return res.status(400).json({
       success: false,
