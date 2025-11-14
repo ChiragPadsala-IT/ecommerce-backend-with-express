@@ -97,6 +97,8 @@ exports.resendVerificationCode = catchAsyncError(async (req, res, next) => {
 
 exports.loginUser = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
+
+  console.log(req.body);
   if (!email || !password) {
     return next(new ErrorHandler("Email and Password are mandatories...", 400));
   }
