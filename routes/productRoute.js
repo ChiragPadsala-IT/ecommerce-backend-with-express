@@ -4,6 +4,7 @@ const {
   createNewProduct,
   newProduct,
   updateProduct,
+  getProductsByCategory,
 } = require("../controller/productController");
 const { isAuthenticatedUser } = require("../middleware/isAuthenticated");
 const { isAdmin } = require("../middleware/isAdmin");
@@ -18,5 +19,7 @@ router.route("/update/:id").put(isAuthenticatedUser, isAdmin, updateProduct);
 
 router.route("/best-seller-products").get(bestSellerProducts);
 router.route("/new-products").get(newProduct);
+
+router.route("/getproductbycategory").get(getProductsByCategory);
 
 module.exports = router;

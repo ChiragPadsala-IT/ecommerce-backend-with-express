@@ -2,6 +2,7 @@ const catchAsyncError = require("../middleware/catchAsyncError");
 const Product = require("../model/productModel");
 const Order = require("../model/orderModel");
 const mongoose = require("mongoose");
+const categoryModel = require("../model/categoryModel");
 
 exports.createNewProduct = catchAsyncError(async (req, res, next) => {
   req.body.mfg = new Date(req.body.mfg);
@@ -93,4 +94,35 @@ exports.newProduct = catchAsyncError(async (req, res, next) => {
   const product = await Product.find().sort({ createdAt: -1 });
 
   res.status(200).json({ success: true, products: product });
+});
+
+exports.getProductsByCategory = catchAsyncError(async (req, res, next) => {
+  const { category } = req.query;
+
+  console.log(category);
+  if (!category) {
+    return res.status(400).json({
+      success: false,
+      message: "Category name is required",
+    });
+  }
+
+  // 1️⃣ Find category by name
+  const categoryData = await categoryModel.findOne({ name: category });
+
+  if (!categoryData) {
+    return res.status(404).json({
+      success: false,
+      message: "Category not found",
+    });
+  }
+
+  // 2️⃣ Find products using category ID
+  const products = await Product.find({ categoryID: categoryData._id });
+
+  res.status(200).json({
+    success: true,
+    category: categoryData.name,
+    products,
+  });
 });
