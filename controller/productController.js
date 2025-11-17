@@ -106,6 +106,10 @@ exports.getProductsByCategory = catchAsyncError(async (req, res, next) => {
     });
   }
 
+  if (category === "bestseller") {
+    return this.bestSellerProducts(req, res, next);
+  }
+
   // 1️⃣ Find category by name
   const categoryData = await categoryModel.findOne({ name: category });
 
